@@ -127,7 +127,7 @@ Contributions are welcome! Please follow these steps:
 5. Create a pull request.
 
 ---
-![image](https://github.com/user-attachments/assets/7e8d0aaa-bc82-408d-9b05-90762784ad70)
+![image](https://github.com/user-attachments/assets/aa6867dd-7113-456b-a7e0-64a25bdf20c3)
 
 
 ## License
