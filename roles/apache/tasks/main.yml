@@ -1,0 +1,25 @@
+# Tasks to install and configure Apache
+---
+- name: Install Apache
+  block:
+    - name: Install Apache package
+      dnf:
+        name: httpd
+        state: present
+  rescue:
+    - name: Print error if Apache installation fails
+      debug:
+        msg: "Failed to install Apache. Please check the package manager."
+
+- name: Start and enable Apache
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+
+- name: Copy index.php to web root
+  copy:
+    src: index.php
+    dest: /var/www/html/index.php
+    mode: '0644'
+  notify: Restart Apache
