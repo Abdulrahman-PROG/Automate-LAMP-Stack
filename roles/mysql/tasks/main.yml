@@ -1,0 +1,30 @@
+# Tasks to install and configure MariaDB
+---
+- name: Install MariaDB
+  block:
+    - name: Install MariaDB package
+      dnf:
+        name:
+          - mariadb-server
+          - python3-PyMySQL
+        state: present
+  rescue:
+    - name: Print error if MariaDB installation fails
+      debug:
+        msg: "Failed to install MariaDB. Please check the package manager."
+
+- name: Start and enable MariaDB
+  service:
+    name: mariadb
+    state: started
+    enabled: yes
+
+- name: Set MySQL root password
+  mysql_user:
+    name: root
+    host: localhost
+    password: "secure_password_123"
+    login_user: root
+    login_password: ""
+    state: present
+  ignore_errors: yes
