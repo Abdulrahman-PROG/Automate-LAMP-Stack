@@ -1,0 +1,19 @@
+# Tasks to configure firewall for web traffic
+---
+- name: Install UFW
+  dnf:
+    name: ufw
+    state: present
+
+- name: Allow HTTP and HTTPS traffic
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - 80
+    - 443
+
+- name: Enable UFW
+  ufw:
+    state: enabled
