@@ -5,6 +5,11 @@
     name: ufw
     state: present
 
+- name: Reset UFW to default state
+  ufw:
+    state: reset
+  ignore_errors: yes
+
 - name: Allow HTTP and HTTPS traffic
   ufw:
     rule: allow
@@ -13,7 +18,19 @@
   loop:
     - 80
     - 443
+  register: ufw_result
+  ignore_errors: yes
 
 - name: Enable UFW
   ufw:
     state: enabled
+  when: ufw_result is success
+  ignore_errors: yes
+
+- name: Debug UFW failure
+  debug:
+    msg: "UFW configuration failed for port {{ item.item }}. Check UFW status manually."
+  when: ufw_result is failed
+  loop: "{{ ufw_result.results }}"
+  loop_control:
+    label: "{{ item.item }}"
