@@ -19,10 +19,22 @@
     state: started
     enabled: yes
 
-- name: Check if MySQL root password is set
-  command: mysqladmin -u root ping
-  register: mysql_ping
+- name: Check if MySQL root can connect without password
+  command: mysql -u root -e "SELECT 1"
+  register: mysql_root_check
   ignore_errors: yes
+  changed_when: false
+
+- name: Set MySQL root password
+  command: mysql -u root -e "SET PASSWORD FOR 'root'@'localhost' = PASSWORD('secure_password_123');"
+  when: mysql_root_check.rc == 0
+  register: root_password_set
+  changed_when: true
+
+- name: Update root authentication to mysql_native_password
+  command: mysql -u root -p'secure_password_123' -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password;"
+  when: root_password_set is success
+  changed_when: true
 
 - name: Remove anonymous users
   mysql_user:
@@ -30,29 +42,13 @@
     host_all: yes
     state: absent
     login_user: root
-    login_password: "{{ mysql_root_password | default('') }}"
-  when: mysql_ping.rc == 0
-  vars:
-    mysql_root_password: "{{ 'secure_password_123' if mysql_ping.rc != 0 else '' }}"
+    login_password: "secure_password_123"
+  when: root_password_set is success
 
 - name: Remove test database
   mysql_db:
     name: test
     state: absent
     login_user: root
-    login_password: "{{ mysql_root_password | default('') }}"
-  when: mysql_ping.rc == 0
-  vars:
-    mysql_root_password: "{{ 'secure_password_123' if mysql_ping.rc != 0 else '' }}"
-
-- name: Set MySQL root password
-  mysql_user:
-    name: root
-    host: localhost
-    password: "secure_password_123"
-    login_user: root
-    login_password: "{{ mysql_root_password | default('') }}"
-    state: present
-  vars:
-    mysql_root_password: "{{ 'secure_password_123' if mysql_ping.rc != 0 else '' }}"
-  ignore_errors: yes
+    login_password: "secure_password_123"
+  when: root_password_set is success
