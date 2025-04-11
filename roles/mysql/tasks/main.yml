@@ -24,13 +24,26 @@
   register: mysql_ping
   ignore_errors: yes
 
-- name: Secure MariaDB installation
-  command: mysql_secure_installation
+- name: Remove anonymous users
+  mysql_user:
+    name: ''
+    host_all: yes
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password | default('') }}"
   when: mysql_ping.rc == 0
-  environment:
-    MYSQL_ROOT_PASSWORD: "secure_password_123"
-  changed_when: true
-  ignore_errors: yes
+  vars:
+    mysql_root_password: "{{ 'secure_password_123' if mysql_ping.rc != 0 else '' }}"
+
+- name: Remove test database
+  mysql_db:
+    name: test
+    state: absent
+    login_user: root
+    login_password: "{{ mysql_root_password | default('') }}"
+  when: mysql_ping.rc == 0
+  vars:
+    mysql_root_password: "{{ 'secure_password_123' if mysql_ping.rc != 0 else '' }}"
 
 - name: Set MySQL root password
   mysql_user:
