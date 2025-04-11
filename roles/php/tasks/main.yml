@@ -1,0 +1,24 @@
+# Tasks to install and configure PHP
+---
+- name: Install PHP
+  block:
+    - name: Install PHP packages
+      dnf:
+        name:
+          - php
+          - php-mysqlnd
+        state: present
+  rescue:
+    - name: Print error if PHP installation fails
+      debug:
+        msg: "Failed to install PHP. Please check the package manager."
+
+- name: Ensure Apache processes PHP
+  copy:
+    content: |
+      <FilesMatch \.php$>
+        SetHandler application/x-httpd-php
+      </FilesMatch>
+    dest: /etc/httpd/conf.d/php.conf
+    mode: '0644'
+  notify: Restart Apache
