@@ -1,0 +1,3 @@
+# Inventory file for development environment
+[webservers]
+localhost ansible_connection=local
